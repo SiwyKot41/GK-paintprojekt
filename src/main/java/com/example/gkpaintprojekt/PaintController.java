@@ -66,31 +66,15 @@ public class PaintController {
             mouseCounter++;
             if (choiceBox.getValue().equals("Linia")) {
                 if (mouseCounter == 1) {
-                    Line drawingLine = new Line();
-                    drawingLine.setStartX(mouseEvent.getX());
-                    drawingLine.setStartY(mouseEvent.getY());
+                    Line drawingLine = createLineWithStartPoint(mouseEvent.getX(), mouseEvent.getY(), 10);
                     lines.add(drawingLine);
                 } else if (mouseCounter == 2) {
-                    Line drawingLine = lines.get(lines.size() - 1);
-                    drawingLine.setEndX(mouseEvent.getX());
-                    drawingLine.setEndY(mouseEvent.getY());
-                    drawingLine.setStrokeWidth(10);
-
+                    Line drawingLine = setLineEndpoint(lines.get(lines.size() - 1), mouseEvent.getX(), mouseEvent.getY());
                     double differenceX = Math.abs(drawingLine.getStartX() - drawingLine.getEndX());
                     double differenceY = Math.abs(drawingLine.getStartY() - drawingLine.getEndY());
 
                     drawingLine.setOnMouseDragged(event -> {
-                        if (drawingLine.contains(event.getX(), event.getY()) && choiceBox.getValue() == "Przeciągnij") {
-                            clickedShapes.add(drawingLine);
-                        }
-
-                        if (clickedShapes.contains(drawingLine)) {
-                            drawingLine.setStartX(event.getX());
-                            drawingLine.setStartY(event.getY());
-                            if (drawingLine.getEndX() > drawingLine.getStartX()) drawingLine.setEndX(event.getX() + differenceX);
-                            else drawingLine.setEndX(event.getX() - differenceX);
-                            drawingLine.setEndY(event.getY() - differenceY);
-                        }
+                        setLineMove(drawingLine, event.getX(), event.getY(), differenceX, differenceY);
                     });
 
                     borderPane.getChildren().add(drawingLine);
@@ -100,22 +84,12 @@ public class PaintController {
 
             if (choiceBox.getValue().equals("Okrąg")) {
                 if (mouseCounter == 1) {
-                    Circle drawingCircle = new Circle();
-                    drawingCircle.setCenterX(mouseEvent.getX());
-                    drawingCircle.setCenterY(mouseEvent.getY());
+                    Circle drawingCircle = createCircleWithStartPoint(mouseEvent.getX(), mouseEvent.getY());
                     circles.add(drawingCircle);
                 } else if (mouseCounter == 2) {
-                    Circle drawingCircle = circles.get(circles.size() - 1);
-                    drawingCircle.setRadius(Math.sqrt(Math.pow(drawingCircle.getCenterX() - mouseEvent.getX(), 2) + Math.pow(drawingCircle.getCenterY() - mouseEvent.getY(), 2)));
+                    Circle drawingCircle = setCircleRadius(circles.get(circles.size() - 1), mouseEvent.getX(), mouseEvent.getY());
                     drawingCircle.setOnMouseDragged(event -> {
-                        if (drawingCircle.contains(event.getX(), event.getY()) && choiceBox.getValue() == "Przeciągnij") {
-                            clickedShapes.add(drawingCircle);
-                        }
-
-                        if (clickedShapes.contains(drawingCircle)) {
-                            drawingCircle.setCenterX(event.getX());
-                            drawingCircle.setCenterY(event.getY());
-                        }
+                        setCircleMove(drawingCircle, event.getX(), event.getY());
                     });
 
                     borderPane.getChildren().add(drawingCircle);
@@ -125,25 +99,14 @@ public class PaintController {
 
             if (choiceBox.getValue().equals("Prostokąt")) {
                 if (mouseCounter == 1) {
-                    Rectangle drawingRectangle = new Rectangle();
-                    drawingRectangle.setX(mouseEvent.getX());
-                    drawingRectangle.setY(mouseEvent.getY());
+                    Rectangle drawingRectangle = createRectangleWidthStartPoint(mouseEvent.getX(), mouseEvent.getY());
                     rectangles.add(drawingRectangle);
                 } else if (mouseCounter == 2) {
-                    Rectangle drawingRectangle = rectangles.get(rectangles.size() - 1);
-                    drawingRectangle.setWidth(Math.abs(mouseEvent.getX() - drawingRectangle.getX()));
+                     setRectangleWidth(rectangles.get(rectangles.size() - 1), mouseEvent.getX());
                 } else if (mouseCounter == 3) {
-                    Rectangle drawingRectangle = rectangles.get(rectangles.size() - 1);
-                    drawingRectangle.setHeight(Math.abs(mouseEvent.getY() - drawingRectangle.getY()));
+                    Rectangle drawingRectangle = setRectangleHeight(rectangles.get(rectangles.size() - 1), mouseEvent.getY());
                     drawingRectangle.setOnMouseDragged(event -> {
-                        if (drawingRectangle.contains(event.getX(), event.getY()) && choiceBox.getValue() == "Przeciągnij") {
-                            clickedShapes.add(drawingRectangle);
-                        }
-
-                        if (clickedShapes.contains(drawingRectangle)) {
-                            drawingRectangle.setX(event.getX());
-                            drawingRectangle.setY(event.getY());
-                        }
+                      setRectangleMove(drawingRectangle, event.getX(), event.getY());
                     });
 
                     borderPane.getChildren().add(drawingRectangle);
@@ -151,6 +114,86 @@ public class PaintController {
                 }
             }
         });
+    }
+
+    public void setRectangleMove(Rectangle rectangle, double x, double y) {
+        if (rectangle.contains(x, y) && choiceBox.getValue() == "Przeciągnij") {
+            clickedShapes.add(rectangle);
+        }
+
+        if (clickedShapes.contains(rectangle)) {
+            rectangle.setX(x);
+            rectangle.setY(y);
+        }
+    }
+
+    public Rectangle createRectangleWidthStartPoint(double x, double y) {
+        Rectangle rectangle = new Rectangle();
+        rectangle.setX(x);
+        rectangle.setY(y);
+        return rectangle;
+    }
+
+    public Rectangle setRectangleWidth(Rectangle rectangle, double x) {
+        rectangle.setWidth(Math.abs(x - rectangle.getX()));
+        return rectangle;
+    }
+
+    public Rectangle setRectangleHeight(Rectangle rectangle, double y) {
+        rectangle.setHeight(Math.abs(y - rectangle.getY()));
+        return rectangle;
+    }
+
+    public void setCircleMove(Circle circle, double x, double y) {
+        if (circle.contains(x, y) && choiceBox.getValue() == "Przeciągnij") {
+            clickedShapes.add(circle);
+        }
+
+        if (clickedShapes.contains(circle)) {
+            circle.setCenterX(x);
+            circle.setCenterY(y);
+        }
+    }
+
+    public Circle createCircleWithStartPoint(double x, double y) {
+        Circle circle = new Circle();
+        circle.setCenterX(x);
+        circle.setCenterY(y);
+        return circle;
+    }
+
+    public Circle setCircleRadius(Circle circle, double x, double y) {
+        circle.setRadius(Math.sqrt(Math.pow(circle.getCenterX() - x, 2) + Math.pow(circle.getCenterY() - y, 2)));
+        return circle;
+    }
+    public void setLineMove(Line line, double x, double y, double differenceX, double differenceY) {
+        if (line.contains(x, y) && choiceBox.getValue() == "Przeciągnij") {
+            clickedShapes.add(line);
+        }
+
+        if (clickedShapes.contains(line)) {
+            if (line.getEndX() > line.getStartX()) line.setEndX(x + differenceX);
+            else line.setEndX(x - differenceX);
+            if (line.getEndY() > line.getStartY()) line.setEndY(y + differenceY);
+            else line.setEndY(y - differenceY);
+            line.setStartX(x);
+            line.setStartY(y);
+        }
+    }
+
+    public Line createLineWithStartPoint(double startX, double startY, double width) {
+        Line line = new Line();
+        line.setStartX(startX);
+        line.setStartY(startY);
+        line.setStrokeWidth(width);
+
+        return line;
+    }
+
+    public Line setLineEndpoint(Line line, double x, double y) {
+        line.setEndX(x);
+        line.setEndY(y);
+        return line;
     }
 
     public void onApplyLineButtonClick(ActionEvent actionEvent) {
@@ -163,11 +206,7 @@ public class PaintController {
             return;
         }
 
-        Line line = new Line();
-        line.setStartX(startX);
-        line.setStartY(startY + offset + 100);
-        line.setEndX(endX);
-        line.setEndY(endY + offset + 100);
+        Line line = new Line(startX, startY + offset + 100, endX, endY + offset + 100);
 
         double differenceX = Math.abs(startX - endX);
         double differenceY = Math.abs(line.getStartY() - line.getEndY());
